@@ -9,12 +9,18 @@ const FormItem = Form.Item;
 
 class Login extends React.Component {
 
-  handleSubmit = (e) => {
+
+    componentWillMount() {
+        localStorage.removeItem("token")
+    }
+
+
+    handleSubmit = (e) => {
    let history= this.props.history;
     e.preventDefault();
     this.props.form.validateFields((err, values) => {
       if (!err) {
-        fetch('http://localhost:1234/auth/login', {
+        fetch('https://parkinglotappofsystem.herokuapp.com/auth/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -24,11 +30,17 @@ class Login extends React.Component {
             password: 'admin',
           })
         }).then(function(response) {
-          history.push("/main");
           response.text().then(v=>{
             let parse = JSON.parse(v);
               let token = parse.token;
+              let role=parse.role;
+              let name=parse.name;
+              let id=parse.id;
             localStorage.setItem("token",token);
+            localStorage.setItem("role",role);
+            localStorage.setItem("name",name);
+            localStorage.setItem("id",id)
+              history.push("/main");
           })
         })
       }

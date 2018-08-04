@@ -9,72 +9,78 @@ import LotList from "./ParkingLotList";
 import 'whatwg-fetch'
 import parkAndTakeApi from "../api/parkAndTake";
 import index from "./index";
-
+import TakeOut from './takeout'
+import parkAndTakeRefresh from "../reduce/parkAndTakeRefresh";
 
 class ParkAndTake extends Component {
 
 
+
+
+
     componentWillMount() {
         parkAndTakeApi.initData(this.props.dispatch)
+
     }
 
-
-    handleChangeIndicator = (index) => {
+    handleChangeIndicator = (index, parkingLotId, orderId) => {
         let dispatch = this.props.dispatch;
         dispatch({
             type: "INDICATOR",
             payload: index
         })
 
+        if (index === 3) {
+            dispatch({
+                type: "UNPARK",
+                payload: {
+                    parkingLotId, orderId
+                }
+            })
+
+        }else if (index === 1) {
+            localStorage.setItem("needParkingOrderId",orderId);
+
+            //停车
+        }
     };
 
     render() {
+        let needUpdate = this.props.needUpdate;
+        if (needUpdate) {
+            parkAndTakeApi.initData(this.props.dispatch)
+            this.props.dispatch({
+                type:"NEED_UPDATE",
+                payload:false
+            })
+        }
+
         const Item = List.Item;
         const Brief = Item.Brief;
         let index = <div>
             <NavBar mode="dark">停取工作列表</NavBar>
             <List className="my-list">
                 {this.props.indexData.map((value, index) => {
-                    let number = value.status==="accepted"?1:3;
+                    let number = value.status === "accepted" ? 1 : 3;
                     return <Item
                         key={index}
                         extra={"详情"}
                         arrow="horizontal"
                         multipleLine
-                        onClick={() => this.handleChangeIndicator(number)}
-                        thumb={value.status==="accepted"?parkLogo:takeLogo}
+                        onClick={() => this.handleChangeIndicator(number, value.parkingLotId, value.id)}
+                        thumb={value.status === "accepted" ? parkLogo : takeLogo}
                         platform="android"
                     >
-                            {value.carNo}<Brief>停车时间：{value.createDate}</Brief>
+                        {value.carNo}<Brief>停车时间：{value.createDate}</Brief>
                     </Item>
                 })}
 
-                {/*<Item*/}
-                {/*extra={"详情"}*/}
-                {/*arrow="horizontal"*/}
-                {/*multipleLine*/}
-                {/*onClick={() => this.handleChangeIndicator(1)}*/}
-                {/*thumb={parkLogo}*/}
-                {/*platform="android"*/}
-                {/*>*/}
-                {/*车牌号<Brief>停车时间：19：00</Brief>*/}
-                {/*</Item>*/}
-                {/*<Item*/}
-                {/*extra={"详情"}*/}
-                {/*arrow="horizontal"*/}
-                {/*multipleLine*/}
-                {/*onClick={() => this.handleChangeIndicator(3)}*/}
-                {/*thumb={takeLogo}*/}
-                {/*platform="android"*/}
-                {/*>*/}
-                {/*车牌号<Brief>停车时间：19：00</Brief>*/}
-                {/*</Item>*/}
 
             </List>
         </div>;
         let choseLot = <ChoseLots/>
 
-        console.log(this.props.indicator)
+        // console.log(this.props.indicator)
         switch (this.props.indicator) {
             case 0:
                 return index;
@@ -82,6 +88,8 @@ class ParkAndTake extends Component {
                 return choseLot;
             case 2:
                 return <LotList/>
+            case 3:
+                return <TakeOut/>
 
         }
     }
@@ -90,7 +98,8 @@ class ParkAndTake extends Component {
 function mapStateToProps(state) {
     return {
         indicator: state.parkAndTake.indicator,
-        indexData: state.parkAndTake.indexData
+        indexData: state.parkAndTake.indexData,
+        needUpdate:state.parkAndTakeRefresh.needUpdate
     };
 }
 

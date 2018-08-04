@@ -2,16 +2,14 @@ import React from 'react';
 import {TabBar} from 'antd-mobile';
 import '../../mobile/component/mobileMain'
 import ParkAndTake from "../component/parkAndTake";
-import OrderList from "../container/orderListContainer";
+import HistoryContainer from "../container/historyContainer"
+import {connect} from 'react-redux';
+import OrderList from "../container/order/orderListContainer";
 
 class mobileMain extends React.Component {
 
     componentWillMount() {
         let item = localStorage.getItem("token");
-        console.log(item)
-        if (item == null) {
-            this.props.history.push("/main/login")
-        }
     }
 
     constructor(props) {
@@ -87,6 +85,12 @@ class mobileMain extends React.Component {
                                 this.setState({
                                     selectedTab: '停取工作列表',
                                 });
+
+                                this.props.dispatch({
+                                    type:"NEED_UPDATE",
+                                    payload:true
+                                })
+                                console.log(123);
                             }}
                             data-seed="logId1"
                         >
@@ -120,6 +124,7 @@ class mobileMain extends React.Component {
                                 });
                             }}
                         >
+                            <HistoryContainer/>
                         </TabBar.Item>
                         <TabBar.Item
                             icon={{uri: 'https://zos.alipayobjects.com/rmsportal/asJMfBrNqpMMlVpeInPQ.svg'}}
@@ -141,4 +146,19 @@ class mobileMain extends React.Component {
     }
 }
 
-export default mobileMain;
+
+
+
+
+function mapStateToProps(state) {
+    return {};
+}
+function mapDispatchToProps(dispatch) {
+    return {
+        dispatch
+    }
+}
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(mobileMain);
